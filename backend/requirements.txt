@@ -1,0 +1,9 @@
+asgiref==3.11.1
+django-cors-headers==4.9.0
+djangorestframework==3.17.1
+djangorestframework_simplejwt==5.5.1
+lazr.restfulclient==0.14.6
+pillow==12.1.1
+PyHamcrest==2.1.0
+sqlparse==0.5.5
+Django==6.0.3

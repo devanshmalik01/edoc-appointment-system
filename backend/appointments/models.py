@@ -24,7 +24,7 @@ class User(AbstractUser):
         return self.role == self.ROLE_DOCTOR
 
     def is_admin_user(self):
-        return self.role == self.ROLE_ADMIN
+        return self.role == self.ROLE_ADMIN or self.is_superuser
 
 
 class DoctorProfile(models.Model):
@@ -49,7 +49,6 @@ class DoctorProfile(models.Model):
     available_days = models.CharField(
         max_length=200,
         default='Monday,Tuesday,Wednesday,Thursday,Friday',
-        help_text='Comma-separated list of available days'
     )
     start_time = models.TimeField(default='09:00')
     end_time = models.TimeField(default='17:00')
@@ -57,9 +56,6 @@ class DoctorProfile(models.Model):
 
     def __str__(self):
         return f"Dr. {self.user.get_full_name()} - {self.specialization}"
-
-    def get_available_days_list(self):
-        return [day.strip() for day in self.available_days.split(',')]
 
 
 class Appointment(models.Model):
@@ -75,17 +71,13 @@ class Appointment(models.Model):
         (STATUS_COMPLETED, 'Completed'),
     ]
 
-    patient = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='patient_appointments'
-    )
-    doctor = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='doctor_appointments'
-    )
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='patient_appointments')
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='doctor_appointments')
     appointment_date = models.DateField()
     appointment_time = models.TimeField()
     reason = models.TextField(blank=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    notes = models.TextField(blank=True, help_text='Doctor notes after appointment')
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -94,6 +86,6 @@ class Appointment(models.Model):
 
     def __str__(self):
         return (
-            f"Appointment: {self.patient.get_full_name()} with "
-            f"Dr. {self.doctor.get_full_name()} on {self.appointment_date}"
+            f"{self.patient.get_full_name()} with Dr. {self.doctor.get_full_name()} "
+            f"on {self.appointment_date}"
         )
